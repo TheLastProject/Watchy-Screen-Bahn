@@ -1,7 +1,6 @@
 #include "GetWeather.h"
 
 #include <Arduino_JSON.h>
-#include <Wifi.h>
 
 #include "GetLocation.h"
 #include "Watchy.h"

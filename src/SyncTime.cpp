@@ -1,7 +1,5 @@
 #include "SyncTime.h"
 
-#include <Wifi.h>
-
 #include "Watchy.h"
 #include "time.h"
 

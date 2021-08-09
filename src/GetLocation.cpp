@@ -2,7 +2,6 @@
 
 #include <Arduino_JSON.h>
 #include <IPAddress.h>
-#include <Wifi.h>
 
 #include "Watchy.h"  // for connectWiFi
 

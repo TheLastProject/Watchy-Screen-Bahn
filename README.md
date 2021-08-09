@@ -1,4 +1,12 @@
-# Watchy-Screen
+# Watchy-Screen-Bahn
+
+This is a port of the watchface [Bahn for Watchy](https://github.com/BraininaBowl/Bahn-for-Watchy) to [Watchy-Screen](https://github.com/charles-haynes/Watchy-Screen).
+
+Differences from upstream:
+1. Added weather info to Bahn
+1. Hidden border
+
+---
 
 Screen based implementation of the [Watchy](https://github.com/sqfmi/Watchy) library. It assumes some familiarity with the Watchy library and only documents the differences.
 

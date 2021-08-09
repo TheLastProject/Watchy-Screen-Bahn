@@ -3,30 +3,12 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "OptimaLTStd22pt7b.h"
-#include "OptimaLTStd7pt7b.h"
-#include "OptimaLTStd_Black32pt7b.h"
+#include "DIN_1451_Engschrift_Regular12pt7b.h"
+#include "DIN_1451_Engschrift_Regular64pt7b.h"
 #include "GetLocation.h"
+#include "GetWeather.h"
 
 using namespace Watchy;
-
-// inspired by http://rosettacode.org/wiki/Number_names#C.2B.2B
-const char *smallNumbers[] = {"",        "one",       "two",      "three",
-                              "four",    "five",      "six",      "seven",
-                              "eight",   "nine",      "ten",      "eleven",
-                              "twelve",  "thirteen",  "fourteen", "fifteen",
-                              "sixteen", "seventeen", "eighteen", "nineteen"};
-const char *decades[] = {"oh", nullptr, "twenty", "thirty", "forty", "fifty"};
-
-void rightJustify(const char *txt, uint16_t &yPos) {
-  int16_t x1, y1;
-  uint16_t w, h;
-  const uint8_t PADDING = 0; // how much padding to leave around text
-  display.getTextBounds(txt, 0, 0, &x1, &y1, &w, &h);
-  // right justify with padding
-  display.setCursor(200-x1-w-PADDING, yPos);
-  display.print(txt);  
-}
 
 void TimeScreen::show() {
   setenv("TZ", Watchy_GetLocation::currentLocation.timezone, 1);
@@ -37,44 +19,131 @@ void TimeScreen::show() {
 
   Watchy::display.fillScreen(bgColor);
 
-  // hours
-  const GFXfont * font = OptimaLTStd_Black32pt7b;
-  display.setFont(font);
-  uint16_t yPos = font->yAdvance; // assume cursor(0,0)
-  rightJustify(smallNumbers[(t.tm_hour + 11) % 12 + 1], yPos);
+  int16_t  x1, y1, lasty;
+  uint16_t w, h;
+  String textstring;
+  bool light = true;
 
-  // minutes
-  font = OptimaLTStd22pt7b;
-  display.setFont(font);
-  yPos += font->yAdvance;
-  const char *txt;
-  assert(t.tm_min >= 0 && t.tm_min < 60);
-  if (t.tm_min == 0) {
-    // 0: exactly on the hour
-    if (t.tm_hour == 0) {
-      txt = "midnight";
-    } else if (t.tm_hour == 12) {
-      txt = "noon";
-    } else {
-      txt = "o'clock";
-    }
-  } else if (10 <= t.tm_min && t.tm_min < 20) {
-    // 10-19
-    txt = smallNumbers[t.tm_min];
-  } else if (t.tm_min <= 59) {
-    // 1-9, 20-59
-    rightJustify(decades[t.tm_min / 10], yPos);
-    yPos += font->yAdvance;
-    txt = smallNumbers[t.tm_min % 10];
+  // ** DRAW **
+
+  //drawbg
+  Watchy::display.fillScreen(light ? GxEPD_WHITE : GxEPD_BLACK);
+  //Watchy::display.fillRoundRect(2,2,196,196,8,light ? GxEPD_BLACK : GxEPD_WHITE);
+  //Watchy::display.fillRoundRect(6,6,188,188,5,light ? GxEPD_WHITE : GxEPD_BLACK);
+
+  Watchy::display.setFont(&DIN_1451_Engschrift_Regular64pt7b);
+  Watchy::display.setTextColor(light ? GxEPD_BLACK : GxEPD_WHITE);
+  Watchy::display.setTextWrap(false);
+
+  //draw hours
+  textstring = t.tm_hour;
+  Watchy::display.getTextBounds(textstring, 0, 0, &x1, &y1, &w, &h);
+  Watchy::display.setCursor(183-w, 100-5);
+  Watchy::display.print(textstring);
+
+  //draw minutes
+  if (t.tm_min < 10) {
+    textstring = "0";
+  } else {
+    textstring = "";
   }
-  // ignore warning about txt not initialized, assert guarantees it will be
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-  rightJustify(txt, yPos);
-  #pragma GCC diagnostic pop
+  textstring += t.tm_min;
+  Watchy::display.getTextBounds(textstring, 0, 0, &x1, &y1, &w, &h);
+  Watchy::display.setCursor(183-w, 100+3+h);
+  Watchy::display.print(textstring);
 
-  // date
-  display.setCursor(0, 195);
-  display.setFont(OptimaLTStd7pt7b);
-  display.print(&t, "%a, %B %d %Y %Z");
+  // draw battery
+  Watchy::display.fillRoundRect(16,16,34,12,4,light ? GxEPD_BLACK : GxEPD_WHITE);
+  Watchy::display.fillRoundRect(49,20,3,4,2,light ? GxEPD_BLACK : GxEPD_WHITE);
+  Watchy::display.fillRoundRect(18,18,30,8,3,light ? GxEPD_WHITE : GxEPD_BLACK);
+  float batt = (getBatteryVoltage()-3.3)/0.9;
+  if (batt > 0) {
+    Watchy::display.fillRoundRect(20,20,26*batt,4,2,light ? GxEPD_BLACK : GxEPD_WHITE);
+  }
+
+  Watchy::display.setFont(&DIN_1451_Engschrift_Regular12pt7b);
+  lasty = 200 - 16;
+
+  //draw steps
+  textstring = sensor.getCounter();
+  textstring += " steps";
+  Watchy::display.getTextBounds(textstring, 0, 0, &x1, &y1, &w, &h);
+  Watchy::display.fillRoundRect(16,lasty-h-2,w + 7,h+4,2,light ? GxEPD_BLACK : GxEPD_WHITE);
+  Watchy::display.setCursor(19, lasty-3);
+  Watchy::display.setTextColor(light ? GxEPD_WHITE : GxEPD_BLACK);
+  Watchy::display.print(textstring);
+  Watchy::display.setTextColor(light ? GxEPD_BLACK : GxEPD_WHITE);
+  lasty += -8-h;
+
+  // draw year
+  textstring = t.tm_year + 1970;
+  Watchy::display.getTextBounds(textstring, 0, 0, &x1, &y1, &w, &h);
+  Watchy::display.setCursor(16, lasty);
+  Watchy::display.print(textstring);
+  lasty += -20;
+
+  // draw date
+  textstring = monthShortStr(t.tm_mon);
+  textstring += " ";
+  textstring += t.tm_mday;
+  Watchy::display.getTextBounds(textstring, 0, 0, &x1, &y1, &w, &h);
+  Watchy::display.setCursor(16, lasty);
+  Watchy::display.print(textstring);
+  lasty += -20;
+
+  // draw day
+  textstring = dayStr(t.tm_wday);
+  Watchy::display.getTextBounds(textstring, 0, 0, &x1, &y1, &w, &h);
+  Watchy::display.setCursor(16, lasty);
+  Watchy::display.print(textstring);
+  lasty += -40;
+
+  // weather things
+  auto wd = Watchy_GetWeather::getWeather();
+
+  // draw weather state
+  if (wd.weatherConditionCode >= 801) {
+    textstring = "Cloudy";
+  } else if (wd.weatherConditionCode == 800) {
+    textstring = "Clear";
+  } else if (wd.weatherConditionCode == 781) {
+    textstring = "Tornado";
+  } else if (wd.weatherConditionCode == 771) {
+    textstring = "Squall";
+  } else if (wd.weatherConditionCode == 762) {
+    textstring = "Ash";
+  } else if (wd.weatherConditionCode == 761 || wd.weatherConditionCode == 731) {
+    textstring = "Dust";
+  } else if (wd.weatherConditionCode == 751) {
+    textstring = "Sand";
+  } else if (wd.weatherConditionCode == 741) {
+    textstring = "Fog";
+  } else if (wd.weatherConditionCode == 721) {
+    textstring = "Haze";
+  } else if (wd.weatherConditionCode == 711) {
+    textstring = "Smoke";
+  } else if (wd.weatherConditionCode == 701) {
+    textstring = "Mist";
+  } else if (wd.weatherConditionCode >= 600) {
+    textstring = "Snow";
+  } else if (wd.weatherConditionCode >= 500) {
+    textstring = "Rain";
+  } else if (wd.weatherConditionCode >= 300) {
+    textstring = "Drizzle";
+  } else if (wd.weatherConditionCode >= 200) {
+    textstring = "Thunderstorm";
+  } else {
+    textstring = "";
+  }
+  display.getTextBounds(textstring, 0, 0, &x1, &y1, &w, &h);
+  display.setCursor(16, lasty);
+  display.print(textstring);
+  lasty += -20;
+
+  // draw temperature
+  textstring = wd.temperature;
+  textstring += strcmp(Watchy_GetWeather::TEMP_UNIT, "metric") == 0 ? "C" : "F";
+  Watchy::display.getTextBounds(textstring, 0, 0, &x1, &y1, &w, &h);
+  Watchy::display.setCursor(16, lasty);
+  Watchy::display.print(textstring);
 }
