@@ -76,7 +76,7 @@ void TimeScreen::show() {
   lasty += -8-h;
 
   // draw year
-  textstring = t.tm_year + 1970;
+  textstring = t.tm_year + 1900;
   Watchy::display.getTextBounds(textstring, 0, 0, &x1, &y1, &w, &h);
   Watchy::display.setCursor(16, lasty);
   Watchy::display.print(textstring);
