@@ -11,6 +11,7 @@ const struct {
   const int16_t code;
   const char* msg;
 } codeMap[] = {
+  // 2xx thunderstorm
     {200, "thunderstorm & light rain"},
     {201, "thunderstorm & rain"},
     {202, "thunderstorm & heavy rain"},
@@ -21,6 +22,7 @@ const struct {
     {230, "thunderstorm & light drizzle"},
     {231, "thunderstorm & drizzle"},
     {232, "thunderstorm & heavy drizzle"},
+  // 3xx drizzle
     {300, "light drizzle"},
     {301, "drizzle"},
     {302, "heavy drizzle"},
@@ -30,6 +32,7 @@ const struct {
     {313, "drizzle & rain showers"},
     {314, "drizzle & heavy rain showers"},
     {321, "drizzle showers"},
+  // 5xx rain
     {500, "light rain"},
     {501, "moderate rain"},
     {502, "heavy rain"},
@@ -41,6 +44,7 @@ const struct {
     {522, "heavy rain showers"},
     {531, "ragged rain showers"},
     {600, "light snow"},
+  // 6xx snow
     {601, "snow"},
     {602, "heavy snow"},
     {611, "sleet"},
@@ -51,6 +55,7 @@ const struct {
     {620, "light snow showers"},
     {621, "snow showers"},
     {622, "heavy snow showers"},
+  // 7xx atmosphere
     {701, "mist"},
     {711, "smoke"},
     {721, "haze"},
@@ -62,6 +67,7 @@ const struct {
     {771, "squalls"},
     {781, "tornado"},
     {800, "clear"},          // <= 10%
+  // 80x clouds
     {801, "light clouds"},   // 11-25%
     {802, "partly cloudy"},  // 26-50%
     {803, "mostly cloudy"},  // 51-80%
@@ -97,6 +103,7 @@ void WeatherScreen::show() {
   Watchy::display.fillScreen(bgColor);
   Watchy::display.setCursor(0, 0);
   auto wd = Watchy_GetWeather::getWeather();
-  display.printf("\n%d deg\n%s", wd.temperature,
+  // assumes TEMP_UNITS is metric, and that wd.temperature is in C
+  display.printf("\n\n%-20s,\n%dC %3.0fF\n%s", wd.weatherCity,wd.temperature,((wd.temperature*1.8)+32),
                  weatherConditionCodeToString(wd.weatherConditionCode));
 }

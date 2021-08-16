@@ -3,6 +3,7 @@
 #include "OptimaLTStd22pt7b.h"
 #include "GetWeatherScreen.h"
 #include "IconScreen.h"
+#include "ImageScreen.h"
 #include "MenuScreen.h"
 #include "SetLocationScreen.h"
 #include "SetTimeScreen.h"
@@ -38,13 +39,14 @@ MenuItem menuItems[] = {{"Set Time", &setTimeScreen},
 MenuScreen menu(menuItems, sizeof(menuItems) / sizeof(menuItems[0]));
 
 TimeScreen timeScreen;
-WeatherScreen weather;
+WeatherScreen weatherScreen;
 IconScreen battery(&rle_battery, "battery", OptimaLTStd22pt7b);
 IconScreen steps(&rle_steps, "steps", OptimaLTStd22pt7b);
 IconScreen orientation(&rle_orientation, "orientation", OptimaLTStd22pt7b);
 IconScreen bluetooth(&rle_bluetooth, "bluetooth", OptimaLTStd22pt7b);
 IconScreen wifi(&rle_wifi, "wifi", OptimaLTStd22pt7b);
 IconScreen settings(&rle_settings, "settings", OptimaLTStd22pt7b);
+ImageScreen weather(cloud, 96, 96, "weather", OptimaLTStd22pt7b);
 ShowBatteryScreen showBattery;
 ShowBluetoothScreen showBluetooth;
 ShowOrientationScreen showOrientation;
@@ -52,7 +54,7 @@ ShowStepsScreen showSteps;
 ShowWifiScreen showWifi;
 
 CarouselItem carouselItems[] = {{&timeScreen, nullptr},
-                                {&weather, nullptr},
+                                {&weather, &weatherScreen},
                                 {&battery, &showBattery},
                                 {&steps, &showSteps},
                                 {&orientation, &showOrientation},

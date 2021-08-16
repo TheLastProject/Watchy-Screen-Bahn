@@ -3,6 +3,10 @@
 #include "Adafruit_GFX.h"
 #include "GxEPD2.h"
 
+// this implements a simple RLE encoding. It expects an Adafruit GFX drawable,
+// the position to draw the image at, a pointer to a rle struct, and the color
+// of the image.
+
 // does no sanity checking, length of bitmap, size of gfx
 void drawRLEBitmap(Adafruit_GFX &gfx, int16_t x, int16_t y, const rle *r,
                    uint16_t color) {

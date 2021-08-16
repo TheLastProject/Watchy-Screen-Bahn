@@ -1,3 +1,6 @@
+# don't check in credentials
+wifi_config.h
+
 app
 /app
 build

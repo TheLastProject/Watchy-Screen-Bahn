@@ -7,3 +7,4 @@ extern const rle rle_orientation;
 extern const rle rle_settings;
 extern const rle rle_steps;
 extern const rle rle_wifi;
+extern const uint8_t cloud[];

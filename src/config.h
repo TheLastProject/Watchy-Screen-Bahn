@@ -39,6 +39,8 @@ const int SOFTWARE_VERSION_PATCH = 0;
 const int HARDWARE_VERSION_MAJOR = 1;
 const int HARDWARE_VERSION_MINOR = 0;
 
+#include "wifi_config.h"
+
 // debugging macros defined in DEBUG releases
 #ifdef DEBUG
 #define LOGE(...) ESP_LOGE(TAG, __VA_ARGS__)

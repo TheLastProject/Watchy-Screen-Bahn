@@ -52,6 +52,7 @@ weatherData getWeather() {
     currentWeather.temperature = int(responseObject["main"]["temp"]);
     currentWeather.weatherConditionCode =
         int(responseObject["weather"][0]["id"]);
+    strncpy(currentWeather.weatherCity,loc->city,sizeof(currentWeather.weatherCity));
     lastWeatherTS = now();
   } else {
     LOGE("http response %d", httpResponseCode);

@@ -14,6 +14,7 @@ const int WEATHER_UPDATE_INTERVAL = 30 * 60 * 1000;  // 30 minutes in millis
 typedef struct weatherData {
   int8_t temperature;
   int16_t weatherConditionCode;
+  char weatherCity[25];
 } weatherData;
 
 extern weatherData getWeather();

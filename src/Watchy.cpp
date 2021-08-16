@@ -1,7 +1,7 @@
 #include "Watchy.h"
 
 #include "Screen.h"
-#include "Screens/SetLocationScreen.h" // bad hack
+#include "GetLocation.h"  // bad dependency
 
 using namespace Watchy;
 
@@ -37,14 +37,17 @@ String getValue(String data, char separator, int index) {
   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
+tmElements_t Watchy::currentTime;
+
 void Watchy::init(String datetime) {
   esp_sleep_wakeup_cause_t wakeup_reason;
   wakeup_reason = esp_sleep_get_wakeup_cause();  // get wake up reason
   Wire.begin(SDA, SCL);                          // init i2c
 
   // sync ESP32 clocks to RTC
-  tmElements_t currentTime;
   if (Watchy::RTC.read(currentTime) == 0) {
+    setenv("TZ", Watchy_GetLocation::currentLocation.timezone, 1);
+    tzset();
     time_t t = makeTime(currentTime);
     setTime(t);
     timeval tv = {t, 0};
@@ -331,9 +334,14 @@ void _bmaConfig() {
 }
 
 bool Watchy::connectWiFi() {
-  if (WL_CONNECT_FAILED ==
-      WiFi.begin()) {  // WiFi not setup, you can also use hard coded
-                       // credentials with WiFi.begin(SSID,PASS);
+#if !defined(WIFI_SSID) || !defined(WIFI_PASSWORD)
+  if (WL_CONNECT_FAILED == WiFi.begin()) {
+    // WiFi not setup, you can also use hard coded credentials with
+    // WiFi.begin(SSID,PASS); by defining WIFI_SSID and WIFI_PASSWORD
+#else
+  if (WL_CONNECT_FAILED == WiFi.begin() && WL_CONNECT_FAILED == WiFi.begin(WIFI_SSID,WIFI_PASSWORD)) {
+    // WiFi not setup
+#endif
     WIFI_CONFIGURED = false;
   } else {
     if (WL_CONNECTED ==
